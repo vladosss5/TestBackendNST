@@ -9,7 +9,9 @@ public class MappingProfiles : Profile
     public MappingProfiles()
     {
         CreateMap<Person, PersonDto>();
+        CreateMap<PersonDto, Person>();
         CreateMap<Skill, SkillDto>();
-        CreateMap<PersonsSkill, PersonsSkillDto>();
+        CreateMap<SkillDto, Skill>();
+        // CreateMap<PersonsSkill, PersonsSkillDto>();
     }
 }

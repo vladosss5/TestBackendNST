@@ -15,7 +15,7 @@ public class PersonRepository : IPersonRepository
         _dbContext = dbContext;
     
     
-    public async Task<ICollection<Person>> GetAllPerson()
+    public async Task<ICollection<Person>> GetAllPersons()
     {
         return await _dbContext.Persons.ToListAsync();
     }
@@ -45,9 +45,6 @@ public class PersonRepository : IPersonRepository
 
     public async Task<Person> UpdatePerson(Person person)
     {
-        if (!PersonExists(person.IdPerson).Result)
-            throw new NotFoundException(nameof(Person), person);
-
         _dbContext.Persons.UpdateRange(person);
         await _dbContext.SaveChangesAsync();
         

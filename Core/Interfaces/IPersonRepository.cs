@@ -4,7 +4,7 @@ namespace Core.Interfaces;
 
 public interface IPersonRepository
 {
-    public Task<ICollection<Person>> GetAllPerson();
+    public Task<ICollection<Person>> GetAllPersons();
 
     public Task<Person> GetPersonById(long idPerson);
 
@@ -13,6 +13,8 @@ public interface IPersonRepository
     public Task<Person> UpdatePerson(Person person);
 
     public Task<bool> DeletePerson(long idPerson);
+    
     public Task<bool> PersonExists(long idPerson);
+    
     public Task<bool> PersonExists(string namePerson);
 }
