@@ -1,4 +1,5 @@
-﻿using App.Core.Interfaces;
+﻿using App.Core.Exceptions;
+using App.Core.Interfaces;
 using App.Core.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -18,9 +19,18 @@ public class PersonService : IPersonService
     public async Task<ActionResult> GetPersons() =>
         new OkObjectResult(await _personRepository.GetPersons());
 
-    public Task<ActionResult> GetPersonById(long idPerson)
+    public async Task<ActionResult> GetPersonById(long idPerson)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var person = await _personRepository.GetPersonById(idPerson);
+            return new OkObjectResult(person);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
+            return new NotFoundResult();
+        }
     }
 
     public Task<ActionResult> DeletePersonById(long idPerson)
@@ -33,8 +43,28 @@ public class PersonService : IPersonService
         throw new NotImplementedException();
     }
 
-    public Task<ActionResult> UpdatePerson(long idPerson, PersonRequest personRequest)
+    public async Task<ActionResult> UpdatePerson(long idPerson, PersonRequest personRequest)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var person = await _personRepository.UpdatePerson(idPerson, personRequest);
+            return new OkObjectResult(person);
+        }
+        catch (AlreadyExistsException e)
+        {
+            _logger.LogError(e.Message);
+            return new BadRequestObjectResult(e.Message);
+        }
+        catch (NotFoundException e)
+        {
+            _logger.LogError(e.Message);
+            return new NotFoundResult();
+        }
+        catch (ModelException ex)
+        {
+            var messages = ex.Errors.Select(x => x.ErrorMessage).ToList();
+            messages.ForEach(x => _logger.LogError(x));
+            return new BadRequestObjectResult(messages);
+        }
     }
 }

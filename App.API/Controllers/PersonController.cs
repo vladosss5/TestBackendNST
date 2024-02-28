@@ -23,5 +23,19 @@ namespace App.API.Controllers
         {
             return await _personService.GetPersons();
         }
+
+        [HttpGet("IdPerson")]
+        [ProducesResponseType(200, Type = typeof(PersonResponse))]
+        public async Task<ActionResult<PersonResponse>> GetPersonById(int idPerson)
+        {
+            return await _personService.GetPersonById(idPerson);
+        }
+
+        [HttpPut("IdPerson")]
+        [ProducesResponseType(200, Type = typeof(PersonResponse))]
+        public async Task<ActionResult<PersonRequest>> UpdatePerson(int idPerson, PersonRequest personRequest)
+        {
+            return await _personService.UpdatePerson(idPerson, personRequest);
+        }
     }
 }
