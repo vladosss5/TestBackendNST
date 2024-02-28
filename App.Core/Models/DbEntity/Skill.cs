@@ -13,5 +13,5 @@ public partial class Skill
 
     public long IdPerson { get; set; }
 
-    public virtual Person IdPersonNavigation { get; set; } = null!;
+    public Person IdPersonNavigation { get; set; } = null!;
 }

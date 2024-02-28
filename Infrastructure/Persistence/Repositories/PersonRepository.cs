@@ -22,7 +22,10 @@ public class PersonRepository : IPersonRepository
     
     public async Task<ICollection<PersonResponse>> GetPersons()
     {
-        return await _dbContext.Persons.Select(p => _mapper.Map<PersonResponse>(p)).ToListAsync();
+        return await _dbContext.Persons
+            .Include(s => s.Skills)
+            .Select(p => _mapper.Map<PersonResponse>(p))
+            .ToListAsync();
     }
 
     public async Task<PersonResponse> GetPersonById(long idPerson)
@@ -30,17 +33,41 @@ public class PersonRepository : IPersonRepository
         if (!PersonExists(idPerson).Result)
             throw new NotFoundException(nameof(Person), idPerson);
 
-        return _mapper.Map<PersonResponse>(await _dbContext.Persons.SingleOrDefaultAsync(p => p.IdPerson == idPerson));
+        return _mapper.Map<PersonResponse>(await _dbContext.Persons.Include(s=>s.Skills)
+            .SingleOrDefaultAsync(p => p.IdPerson == idPerson));
     }
 
-    public Task<bool> DeletePersonById(long idPerson)
+    public async Task<bool> DeletePersonById(long idPerson)
     {
-        throw new NotImplementedException();
+        if (!PersonExists(idPerson).Result)
+            throw new NotFoundException(nameof(Person), idPerson);
+
+        var person = await _dbContext.Persons.FindAsync(new object[] { idPerson });
+        var skills = await _dbContext.Skills.Where(s => s.IdPerson == person.IdPerson).ToListAsync();
+        
+        _dbContext.Skills.RemoveRange(skills);
+        _dbContext.Persons.Remove(person);
+        await _dbContext.SaveChangesAsync();
+
+        return true;
     }
 
-    public Task<PersonResponse> CreatePerson(PersonRequest personRequest)
+    public async Task<PersonResponse> CreatePerson(PersonRequest personRequest)
     {
-        throw new NotImplementedException();
+        var validator = new RecursiveDataAnnotationValidator();
+        var results = new List<ValidationResult>();
+        
+        if (!validator.TryValidateObjectRecursive(personRequest, results))
+            throw new ModelException(results);
+        if (PersonExists(personRequest.Name).Result && 
+            PersonExists(personRequest.DisplayName).Result)
+            throw new AlreadyExistsException(nameof(Person), personRequest.Name);
+
+        var person = _mapper.Map<Person>(personRequest);
+        await _dbContext.AddAsync(person);
+        await _dbContext.SaveChangesAsync();
+
+        return _mapper.Map<PersonResponse>(person);
     }
 
     public async Task<PersonResponse> UpdatePerson(long idPerson, PersonRequest personRequest)
@@ -56,17 +83,15 @@ public class PersonRepository : IPersonRepository
             throw new NotFoundException(nameof(Person), idPerson);
 
         var person = await _dbContext.Persons.SingleOrDefaultAsync(p => p.IdPerson == idPerson);
-        var skillsPerson = _dbContext.Skills.Where(s => s.IdPerson == person.IdPerson).ToList();
 
         person.Name = personRequest.Name;
         person.DisplayName = personRequest.DisplayName;
-        person.Skills.Clear();
+
         person.Skills = personRequest.Skills
             .Select(s => new Skill() { Name = s.Name, Level = s.Level })
             .ToList();
-
-        _dbContext.Skills.RemoveRange(skillsPerson);
-        _dbContext.Update(person);
+        
+        _dbContext.UpdateRange(person);
         await _dbContext.SaveChangesAsync();
 
         return _mapper.Map<PersonResponse>(person);

@@ -11,8 +11,7 @@ namespace App.API.Controllers
     public class PersonController : ControllerBase
     {
         private readonly IPersonService _personService;
-
-
+        
         public PersonController(IPersonService personService) => 
             _personService = personService;
         
@@ -36,6 +35,20 @@ namespace App.API.Controllers
         public async Task<ActionResult<PersonRequest>> UpdatePerson(int idPerson, PersonRequest personRequest)
         {
             return await _personService.UpdatePerson(idPerson, personRequest);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(200, Type = typeof(PersonResponse))]
+        public async Task<ActionResult<PersonResponse>> CreatePerson(PersonRequest personRequest)
+        {
+            return await _personService.CreatePerson(personRequest);
+        }
+
+        [HttpDelete]
+        [ProducesResponseType(200, Type = typeof(bool))]
+        public async Task<ActionResult<bool>> DeletePerson(long idPerson)
+        {
+            return await _personService.DeletePersonById(idPerson);
         }
     }
 }

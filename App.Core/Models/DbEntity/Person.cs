@@ -11,5 +11,5 @@ public partial class Person
 
     public string DisplayName { get; set; } = null!;
 
-    public virtual ICollection<Skill> Skills { get; set; } = new List<Skill>();
+    public ICollection<Skill> Skills { get; set; } = new List<Skill>();
 }

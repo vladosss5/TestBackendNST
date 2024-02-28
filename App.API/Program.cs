@@ -20,11 +20,11 @@ builder.Host.UseSerilog();
 
 var app = builder.Build();
 
-using (var serviceScope = app.Services.CreateScope())
-{
-    var dbContext = serviceScope.ServiceProvider.GetRequiredService<DBContext>();
-    await dbContext.Database.MigrateAsync();
-}
+// using (var serviceScope = app.Services.CreateScope())
+// {
+//     var dbContext = serviceScope.ServiceProvider.GetRequiredService<DBContext>();
+//     await dbContext.Database.MigrateAsync();
+// }
 
 if (app.Environment.IsDevelopment())
 {

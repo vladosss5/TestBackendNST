@@ -33,14 +33,38 @@ public class PersonService : IPersonService
         }
     }
 
-    public Task<ActionResult> DeletePersonById(long idPerson)
+    public async Task<ActionResult> DeletePersonById(long idPerson)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var deleting = await _personRepository.DeletePersonById(idPerson);
+            return new OkObjectResult(deleting);
+        }
+        catch (NotFoundException e)
+        {
+            _logger.LogError(e.Message);
+            return new NotFoundResult();
+        }
     }
 
-    public Task<ActionResult> CreatePerson(PersonRequest personRequest)
+    public async Task<ActionResult> CreatePerson(PersonRequest personRequest)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var person = await _personRepository.CreatePerson(personRequest);
+            return new OkObjectResult(person);
+        }
+        catch (ModelException e)
+        {
+            var messages = e.Errors.Select(x => x.ErrorMessage).ToList();
+            messages.ForEach(x => _logger.LogError(x));
+            return new BadRequestObjectResult(messages);
+        }
+        catch (AlreadyExistsException e)
+        {
+            _logger.LogError(e.Message);
+            return new BadRequestObjectResult(e.Message);
+        }
     }
 
     public async Task<ActionResult> UpdatePerson(long idPerson, PersonRequest personRequest)
