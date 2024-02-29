@@ -20,6 +20,9 @@ builder.Host.UseSerilog();
 
 var app = builder.Build();
 
+
+//Раскомментировать для миграции:
+
 // using (var serviceScope = app.Services.CreateScope())
 // {
 //     var dbContext = serviceScope.ServiceProvider.GetRequiredService<DBContext>();
@@ -33,8 +36,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
 
 app.MapControllers();
 

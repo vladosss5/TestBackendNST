@@ -83,14 +83,18 @@ public class PersonRepository : IPersonRepository
             throw new NotFoundException(nameof(Person), idPerson);
 
         var person = await _dbContext.Persons.SingleOrDefaultAsync(p => p.IdPerson == idPerson);
+        var skills = personRequest.Skills.Select(s => new Skill()
+        {
+            Name = s.Name,
+            Level = s.Level,
+            IdPerson = person.IdPerson
+        }).ToList();
 
         person.Name = personRequest.Name;
         person.DisplayName = personRequest.DisplayName;
-
-        person.Skills = personRequest.Skills
-            .Select(s => new Skill() { Name = s.Name, Level = s.Level })
-            .ToList();
+        person.Skills = skills;
         
+        _dbContext.UpdateRange(skills);
         _dbContext.UpdateRange(person);
         await _dbContext.SaveChangesAsync();
 
