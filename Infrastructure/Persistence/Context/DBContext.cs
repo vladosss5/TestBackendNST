@@ -15,9 +15,6 @@ public partial class DBContext : DbContext
         : base(options)
     {
     }
-    
-    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //     => optionsBuilder.UseNpgsql("Server=localhost;port=6543;user id=postgres;password=toor;database=NstDemo;");
 
     public virtual DbSet<Person> Persons { get; set; }
 
