@@ -1,6 +1,7 @@
 ﻿.idea
 .vs
 App.API/Logs/
+App.Tests
 
 [Dd]ebug/
 [Dd]ebugPublic/

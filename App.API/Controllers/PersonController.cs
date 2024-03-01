@@ -18,37 +18,52 @@ namespace App.API.Controllers
         
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<PersonResponse>))]
-        public async Task<ActionResult<ICollection<PersonResponse>>> GetAllPersons()
+        public async Task<IActionResult> GetAllPersons()
         {
-            return await _personService.GetPersons();
+            var personResponse = await _personService.GetPersons();
+            
+            if (personResponse == null)
+                return new EmptyResult();
+                
+            return Ok(personResponse);
         }
 
-        [HttpGet("IdPerson")]
+        [HttpGet("Id")]
         [ProducesResponseType(200, Type = typeof(PersonResponse))]
-        public async Task<ActionResult<PersonResponse>> GetPersonById(int idPerson)
+        public async Task<IActionResult> GetPersonById(int idPerson)
         {
-            return await _personService.GetPersonById(idPerson);
+            var personResponse = await _personService.GetPersonById(idPerson);
+            if (personResponse == null)
+                return BadRequest();
+
+            return Ok(personResponse);
         }
 
-        [HttpPut("IdPerson")]
+        [HttpPut("Id")]
         [ProducesResponseType(200, Type = typeof(PersonResponse))]
-        public async Task<ActionResult<PersonRequest>> UpdatePerson(int idPerson, PersonRequest personRequest)
+        public async Task<IActionResult> UpdatePerson(int idPerson, PersonRequest personRequest)
         {
-            return await _personService.UpdatePerson(idPerson, personRequest);
+            var personResponse = await _personService.UpdatePerson(idPerson, personRequest);
+            return Ok(personResponse);
         }
 
         [HttpPost]
         [ProducesResponseType(200, Type = typeof(PersonResponse))]
-        public async Task<ActionResult<PersonResponse>> CreatePerson(PersonRequest personRequest)
+        public async Task<IActionResult> CreatePerson(PersonRequest personRequest)
         {
-            return await _personService.CreatePerson(personRequest);
+            var personResponse = await _personService.CreatePerson(personRequest);
+            return Ok(personResponse);
         }
 
         [HttpDelete]
         [ProducesResponseType(200, Type = typeof(bool))]
-        public async Task<ActionResult<bool>> DeletePerson(long idPerson)
+        public async Task<IActionResult> DeletePerson(long idPerson)
         {
-            return await _personService.DeletePersonById(idPerson);
+            var deleting = await _personService.DeletePersonById(idPerson);
+            if (deleting == null)
+                return BadRequest();
+
+            return Ok();
         }
     }
 }

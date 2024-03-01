@@ -5,13 +5,13 @@ namespace App.Core.Interfaces;
 
 public interface IPersonService
 {
-    public Task<ActionResult> GetPersons();
+    public Task<ICollection<PersonResponse>> GetPersons();
 
-    public Task<ActionResult> GetPersonById(long idPerson);
+    public Task<PersonResponse> GetPersonById(long idPerson);
     
-    public Task<ActionResult> DeletePersonById(long idPerson);
+    public Task<bool> DeletePersonById(long idPerson);
     
-    public Task<ActionResult> CreatePerson(PersonRequest personRequest);
+    public Task<PersonResponse> CreatePerson(PersonRequest personRequest);
     
-    public Task<ActionResult> UpdatePerson(long idPerson, PersonRequest personRequest);
+    public Task<PersonResponse> UpdatePerson(long idPerson, PersonRequest personRequest);
 }

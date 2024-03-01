@@ -5,7 +5,7 @@ namespace Infrastructure;
 
 public partial class Skill
 {
-    public long IdSkill { get; set; }
+    public long Id { get; set; }
 
     public string Name { get; set; } = null!;
 
@@ -13,5 +13,5 @@ public partial class Skill
 
     public long IdPerson { get; set; }
 
-    public Person IdPersonNavigation { get; set; } = null!;
+    public Person Person { get; set; } = null!;
 }

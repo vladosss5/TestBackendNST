@@ -1,19 +1,20 @@
 ﻿using App.Core.Models.DTOs;
 using Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 
 namespace App.Core.Interfaces;
 
 public interface IPersonRepository
 {
-    public Task<ICollection<PersonResponse>> GetPersons();
+    public Task<ICollection<Person>> GetPersons();
 
-    public Task<PersonResponse> GetPersonById(long idPerson);
+    public Task<Person> GetPersonById(long idPerson);
 
     public Task<bool> DeletePersonById(long idPerson);
 
-    public Task<PersonResponse> CreatePerson(PersonRequest personRequest);
+    public Task<Person> CreatePerson(Person person);
 
-    public Task<PersonResponse> UpdatePerson(long idPerson, PersonRequest personRequest);
+    public Task<Person> UpdatePerson(long idPerson, Person person);
     
     public Task<bool> PersonExists(long idPerson);
     
