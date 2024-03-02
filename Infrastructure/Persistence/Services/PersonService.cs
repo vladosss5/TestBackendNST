@@ -21,7 +21,7 @@ public class PersonService : IPersonService
         (personRepository, logger, mapper);
 
 
-    public async Task<ICollection<PersonResponse>> GetPersons() =>
+    public async Task<ICollection<PersonResponse>> GetPersons() =>  
          _personRepository.GetPersons().Result.Select(p => _mapper.Map<PersonResponse>(p)).ToList();
 
     public async Task<PersonResponse> GetPersonById(long idPerson)
@@ -30,7 +30,7 @@ public class PersonService : IPersonService
         {
             return _mapper.Map<PersonResponse>(await _personRepository.GetPersonById(idPerson));
         }
-        catch (Exception e)
+        catch (NotFoundException e)
         {
             _logger.LogError(e.Message);
             throw new NotFoundException(nameof(Person), idPerson);
@@ -66,7 +66,7 @@ public class PersonService : IPersonService
         catch (AlreadyExistsException e)
         {
             _logger.LogError(e.Message);
-            throw new AlreadyExistsException(nameof(Person), personRequest);
+            throw new AlreadyExistsException(nameof(Person), personRequest.Name);
         }
     }
 
@@ -76,11 +76,6 @@ public class PersonService : IPersonService
         {
             return _mapper.Map<PersonResponse>(
                 await _personRepository.UpdatePerson(idPerson, _mapper.Map<Person>(personRequest)));
-        }
-        catch (AlreadyExistsException e)
-        {
-            _logger.LogError(e.Message);
-            throw new AlreadyExistsException(nameof(Person), personRequest);
         }
         catch (NotFoundException e)
         {

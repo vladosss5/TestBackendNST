@@ -77,8 +77,7 @@ public class PersonRepository : IPersonRepository
             throw new AlreadyExistsException(nameof(Skill), person.Skills);
         if (!PersonExists(idPerson).Result)
             throw new NotFoundException(nameof(Person), idPerson);
-
-        // var person = await _dbContext.Persons.SingleOrDefaultAsync(p => p.Id == idPerson);
+        
         var skills = person.Skills.Select(s => new Skill()
         {
             Name = s.Name,

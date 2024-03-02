@@ -1,5 +1,7 @@
+using App.Core.Exceptions;
 using App.Core.Interfaces;
 using App.Core.Models.DTOs;
+using Infrastructure;
 using Infrastructure.Persistence.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,50 +22,84 @@ namespace App.API.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<PersonResponse>))]
         public async Task<IActionResult> GetAllPersons()
         {
-            var personResponse = await _personService.GetPersons();
+            try
+            {
+                var personResponse = await _personService.GetPersons();
+                return Ok(personResponse);
+            }
+            catch (NotFoundException e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
             
-            if (personResponse == null)
-                return new EmptyResult();
-                
-            return Ok(personResponse);
         }
 
         [HttpGet("Id")]
         [ProducesResponseType(200, Type = typeof(PersonResponse))]
         public async Task<IActionResult> GetPersonById(int idPerson)
         {
-            var personResponse = await _personService.GetPersonById(idPerson);
-            if (personResponse == null)
-                return BadRequest();
-
-            return Ok(personResponse);
+            try
+            {
+                var personResponse = await _personService.GetPersonById(idPerson);
+                return Ok(personResponse);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPut("Id")]
         [ProducesResponseType(200, Type = typeof(PersonResponse))]
         public async Task<IActionResult> UpdatePerson(int idPerson, PersonRequest personRequest)
         {
-            var personResponse = await _personService.UpdatePerson(idPerson, personRequest);
-            return Ok(personResponse);
+            try
+            {
+                var personResponse = await _personService.UpdatePerson(idPerson, personRequest);
+                return Ok(personResponse);
+            }
+            catch (Exception e)
+            {
+                if (e is NotFoundException)
+                {
+                    return NotFound(e.Message);
+                }
+                else
+                {
+                    return BadRequest(e.Message);
+                }
+            }
         }
 
         [HttpPost]
         [ProducesResponseType(200, Type = typeof(PersonResponse))]
         public async Task<IActionResult> CreatePerson(PersonRequest personRequest)
         {
-            var personResponse = await _personService.CreatePerson(personRequest);
-            return Ok(personResponse);
+            try
+            {
+                var personResponse = await _personService.CreatePerson(personRequest);
+                return Ok(personResponse);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpDelete]
         [ProducesResponseType(200, Type = typeof(bool))]
         public async Task<IActionResult> DeletePerson(long idPerson)
         {
-            var deleting = await _personService.DeletePersonById(idPerson);
-            if (deleting == null)
-                return BadRequest();
-
-            return Ok();
+            try
+            {
+                var deleting = await _personService.DeletePersonById(idPerson);
+                return Ok(deleting);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }
