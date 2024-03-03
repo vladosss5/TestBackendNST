@@ -9,6 +9,7 @@ using System.ComponentModel.DataAnnotations;
 using App.Core.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using NuGet.Packaging;
 
 namespace Infrastructure.Persistence.Repositories;
 
@@ -49,51 +50,60 @@ public class PersonRepository : IPersonRepository
         return true;
     }
 
-    public async Task<Person> CreatePerson(Person person)
+    public async Task<Person> CreatePerson(Person personRequest)
     {
         var validator = new RecursiveDataAnnotationValidator();
         var results = new List<ValidationResult>();
         
-        if (!validator.TryValidateObjectRecursive(person, results))
+        if (!validator.TryValidateObjectRecursive(personRequest, results))
             throw new ModelException(results);
-        if (PersonExists(person.Name).Result && 
-            PersonExists(person.DisplayName).Result)
-            throw new AlreadyExistsException(nameof(Person), person.Name);
+        if (PersonExists(personRequest.Name).Result && 
+            PersonExists(personRequest.DisplayName).Result)
+            throw new AlreadyExistsException(nameof(Person), personRequest.Name);
         
-        await _dbContext.AddAsync(person);
+        await _dbContext.AddAsync(personRequest);
         await _dbContext.SaveChangesAsync();
 
-        return person;
+        return personRequest;
     }
 
-    public async Task<Person> UpdatePerson(long idPerson, Person person)
+    public async Task<Person> UpdatePerson(long idPerson, Person personRequest)
     {
         var validator = new RecursiveDataAnnotationValidator();
         var results = new List<ValidationResult>();
         
-        if (!validator.TryValidateObjectRecursive(person, results))
+        if (!validator.TryValidateObjectRecursive(personRequest, results))
             throw new ModelException(results);
-        if (person.Skills.Select(x => x.Name).HasDuplicates())
-            throw new AlreadyExistsException(nameof(Skill), person.Skills);
+        if (personRequest.Skills.Select(x => x.Name).HasDuplicates())
+            throw new AlreadyExistsException(nameof(Skill), personRequest.Skills);
         if (!PersonExists(idPerson).Result)
             throw new NotFoundException(nameof(Person), idPerson);
-        
-        var skills = person.Skills.Select(s => new Skill()
-        {
-            Name = s.Name,
-            Level = s.Level,
-            IdPerson = person.Id
-        }).ToList();
 
-        person.Name = person.Name;
-        person.DisplayName = person.DisplayName;
-        person.Skills = skills;
+        var updatingPerson = await _dbContext.Persons
+            .FirstOrDefaultAsync(p => p.Id == idPerson);
+
+        var updatingSkills = _dbContext.Skills.Where(s => s.IdPerson == idPerson);
+
+        updatingPerson.Name = personRequest.Name;
+        updatingPerson.DisplayName = personRequest.DisplayName;
+        updatingPerson.Skills.Clear();
         
-        _dbContext.UpdateRange(skills);
-        _dbContext.UpdateRange(person);
+        foreach (var oldSkill in updatingSkills)
+        {
+            foreach (var newSkill in personRequest.Skills)
+            {
+                if (oldSkill.Name == newSkill.Name)
+                {
+                    oldSkill.Level = newSkill.Level;
+                    updatingPerson.Skills.Add(oldSkill);
+                }
+            }
+        }
+        
+        _dbContext.Update(updatingPerson);
         await _dbContext.SaveChangesAsync();
 
-        return person;
+        return updatingPerson;
     }
 
     public async Task<bool> PersonExists(long idPerson) =>
